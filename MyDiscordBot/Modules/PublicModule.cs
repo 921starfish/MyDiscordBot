@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Configuration;
 using MyDiscordBot.Services;
 
 namespace MyDiscordBot.Modules
@@ -11,6 +12,7 @@ namespace MyDiscordBot.Modules
     {
         // Dependency Injection will fill this value in for us
         // public PictureService PictureService { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         [Command("ping")]
         [Alias("pong", "hello")]
@@ -24,6 +26,16 @@ namespace MyDiscordBot.Modules
             user = user ?? Context.User;
 
             await ReplyAsync(user.ToString());
+        }
+
+        [RequireUserPermission(GuildPermission.ManageChannels, ErrorMessage = "チャンネルを作る権限が無いよ！")]
+        [RequireBotPermission(GuildPermission.ManageChannels)]
+        [Command("create")]
+        public async Task CreateGroup()
+        {
+            var user = Context.User as IGuildUser;
+            ulong.TryParse(Configuration["category:general"], out ulong categoryId);
+            await user.Guild.CreateTextChannelAsync(user.Username ?? "aaa", x => { x.CategoryId = categoryId; });
         }
 
         // [Remainder] takes the rest of the command's arguments as one argument, rather than splitting every space
