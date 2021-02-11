@@ -22,20 +22,11 @@ namespace MyDiscordBot
     // - https://github.com/foxbot/patek - a more feature-filled bot, utilizing more aspects of the library
     class Program
     {
-        private readonly IConfigurationRoot _configuration;
-
         // There is no need to implement IDisposable like before as we are
         // using dependency injection, which handles calling Dispose for us.
         static void Main(string[] args)
         {
             new Program().MainAsync().GetAwaiter().GetResult();
-        }
-        public Program()
-        {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile(path: "appsettings.json");
-            _configuration = builder.Build();
         }
 
         public async Task MainAsync()
@@ -47,13 +38,14 @@ namespace MyDiscordBot
             using (var services = ConfigureServices())
             {
                 var client = services.GetRequiredService<DiscordSocketClient>();
+                var configuration = services.GetRequiredService<IConfiguration>();
 
                 client.Log += LogAsync;
                 services.GetRequiredService<CommandService>().Log += LogAsync;
 
                 // Tokens should be considered secret data and never hard-coded.
                 // We can read from the environment variable to avoid hardcoding.
-                await client.LoginAsync(TokenType.Bot, _configuration["token"]);
+                await client.LoginAsync(TokenType.Bot, configuration["token"]);
                 await client.StartAsync();
 
                 // Here we initialize the logic required to register our commands.
@@ -73,6 +65,11 @@ namespace MyDiscordBot
         private ServiceProvider ConfigureServices()
         {
             return new ServiceCollection()
+                .AddSingleton<IConfiguration>(
+                    new ConfigurationBuilder()
+                        .SetBasePath(Directory.GetCurrentDirectory())
+                        .AddJsonFile(path: "appsettings.json").Build()
+                )
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
