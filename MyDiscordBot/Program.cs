@@ -1,31 +1,37 @@
-﻿using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using MyDiscordBot.Services;
+using System;
+using System.IO;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MyDiscordBot
 {
+    // This is a minimal example of using Discord.Net's command
+    // framework - by no means does it show everything the framework
+    // is capable of.
+    //
+    // You can find samples of using the command framework:
+    // - Here, under the 02_commands_framework sample
+    // - https://github.com/foxbot/DiscordBotBase - a bare-bones bot template
+    // - https://github.com/foxbot/patek - a more feature-filled bot, utilizing more aspects of the library
     class Program
     {
-        private readonly DiscordSocketClient _client;
         private readonly IConfigurationRoot _configuration;
 
+        // There is no need to implement IDisposable like before as we are
+        // using dependency injection, which handles calling Dispose for us.
         static void Main(string[] args)
         {
             new Program().MainAsync().GetAwaiter().GetResult();
         }
-
         public Program()
         {
-            _client = new DiscordSocketClient();
-
-            _client.Log += LogAsync;
-            _client.Ready += ReadyAsync;
-            _client.MessageReceived += MessageReceivedAsync;
-
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(path: "appsettings.json");
@@ -34,32 +40,44 @@ namespace MyDiscordBot
 
         public async Task MainAsync()
         {
-            await _client.LoginAsync(TokenType.Bot, _configuration["token"]);
-            await _client.StartAsync();
+            // You should dispose a service provider created using ASP.NET
+            // when you are finished using it, at the end of your app's lifetime.
+            // If you use another dependency injection framework, you should inspect
+            // its documentation for the best way to do this.
+            using (var services = ConfigureServices())
+            {
+                var client = services.GetRequiredService<DiscordSocketClient>();
 
-            await Task.Delay(Timeout.Infinite);
+                client.Log += LogAsync;
+                services.GetRequiredService<CommandService>().Log += LogAsync;
+
+                // Tokens should be considered secret data and never hard-coded.
+                // We can read from the environment variable to avoid hardcoding.
+                await client.LoginAsync(TokenType.Bot, _configuration["token"]);
+                await client.StartAsync();
+
+                // Here we initialize the logic required to register our commands.
+                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+
+                await Task.Delay(Timeout.Infinite);
+            }
         }
 
         private Task LogAsync(LogMessage log)
         {
             Console.WriteLine(log.ToString());
-            return Task.CompletedTask;
-        }
-
-        private Task ReadyAsync()
-        {
-            Console.WriteLine($"{_client.CurrentUser} is connected!");
 
             return Task.CompletedTask;
         }
 
-        private async Task MessageReceivedAsync(SocketMessage message)
+        private ServiceProvider ConfigureServices()
         {
-            if (message.Author.Id == _client.CurrentUser.Id)
-                return;
-
-            if (message.Content == "!ping")
-                await message.Channel.SendMessageAsync("pong!");
+            return new ServiceCollection()
+                .AddSingleton<DiscordSocketClient>()
+                .AddSingleton<CommandService>()
+                .AddSingleton<CommandHandlingService>()
+                .AddSingleton<HttpClient>()
+                .BuildServiceProvider();
         }
     }
 }
