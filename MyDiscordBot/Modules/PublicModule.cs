@@ -35,7 +35,16 @@ namespace MyDiscordBot.Modules
         {
             var user = Context.User as IGuildUser;
             ulong.TryParse(Configuration["category:general"], out ulong categoryId);
-            await user.Guild.CreateTextChannelAsync(user.Username ?? "aaa", x => { x.CategoryId = categoryId; });
+            var a = await user.Guild.CreateTextChannelAsync(user.Username ?? "aaa", x => { x.CategoryId = categoryId; });
+        }
+
+        [Command("tell")]
+        public async Task Tell(params IUser[] users)
+        {
+            foreach(var user in users)
+            {
+                await user.SendMessageAsync("秘密");
+            }
         }
 
         // [Remainder] takes the rest of the command's arguments as one argument, rather than splitting every space
