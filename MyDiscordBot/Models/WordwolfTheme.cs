@@ -13,5 +13,12 @@ namespace MyDiscordBot.Models
         public string A { get; set; }
         [Required]
         public string B { get; set; }
+
+        public WordwolfTheme(string A, string B)
+        {
+            if (A == B) { throw new Exception(message: "AとBが同じです。"); }
+            this.A = A;
+            this.B = B;
+        }
     }
 }

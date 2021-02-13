@@ -19,8 +19,8 @@ namespace MyDiscordBot
             modelBuilder.Entity<WordwolfTheme>()
                 .ToTable("WORDWOLF_THEMES")
                 .HasData(
-                    new WordwolfTheme { Id = 1, A = "りんご", B = "みかん" },
-                    new WordwolfTheme { Id = 2, A = "たぬき", B = "きつね" }
+                    new WordwolfTheme(A: "りんご", B: "みかん") { Id = 1 },
+                    new WordwolfTheme(A: "たぬき", B: "きつね") { Id = 2 }
                 );
         }
     }
