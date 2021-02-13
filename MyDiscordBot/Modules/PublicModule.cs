@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -13,6 +14,7 @@ namespace MyDiscordBot.Modules
         // Dependency Injection will fill this value in for us
         // public PictureService PictureService { get; set; }
         public IConfiguration Configuration { get; set; }
+        public MyFirstBotDbContext db { get; set; }
 
         [Command("ping")]
         [Alias("pong", "hello")]
@@ -43,7 +45,7 @@ namespace MyDiscordBot.Modules
         {
             foreach(var user in users)
             {
-                await user.SendMessageAsync("秘密");
+                await user.SendMessageAsync(db.WordwolfThemes.First().A);
             }
         }
 

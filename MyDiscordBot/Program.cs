@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MyDiscordBot.Services;
@@ -74,6 +75,7 @@ namespace MyDiscordBot
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<HttpClient>()
+                .AddDbContext<MyFirstBotDbContext>(options => options.UseSqlServer("name=ConnectionStrings:MyFirstBotDb"))
                 .BuildServiceProvider();
         }
     }
