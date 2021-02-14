@@ -38,7 +38,7 @@ namespace MyDiscordBot.Services
             status.Voted = new Dictionary<IUser, IUser>();
 
             var random = new Random();
-            status.Wolf = Players[random.Next(Players.Count - 1)];
+            status.Wolf = Players[random.Next(Players.Count)];
 
             if (latest)
             {
@@ -47,9 +47,9 @@ namespace MyDiscordBot.Services
             else
             {
                 var allThemes = await DB.WordwolfThemes.ToListAsync();
-                status.Theme = allThemes[random.Next(allThemes.Count - 1)];
+                status.Theme = allThemes[random.Next(allThemes.Count)];
             }
-            var (jinroTheme, villagerTheme) = random.Next(1) == 1 ? (status.Theme.A, status.Theme.B) : (status.Theme.B, status.Theme.A);
+            var (jinroTheme, villagerTheme) = random.Next(2) == 0 ? (status.Theme.A, status.Theme.B) : (status.Theme.B, status.Theme.A);
             return (status.Wolf, jinroTheme, villagerTheme);
         }
 
