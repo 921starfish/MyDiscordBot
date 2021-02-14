@@ -75,6 +75,7 @@ namespace MyDiscordBot
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<HttpClient>()
+                .AddSingleton<WordwolfService>()
                 .AddDbContext<MyFirstBotDbContext>(options => options.UseSqlServer("name=ConnectionStrings:MyFirstBotDb"))
                 .BuildServiceProvider();
         }

@@ -9,7 +9,7 @@ using MyDiscordBot.Services;
 namespace MyDiscordBot.Modules
 {
     // Modules must be public and inherit from an IModuleBase
-    public class PublicModule : ModuleBase<SocketCommandContext>
+    public class DevelopModule : ModuleBase<SocketCommandContext>
     {
         // Dependency Injection will fill this value in for us
         // public PictureService PictureService { get; set; }
