@@ -136,6 +136,11 @@ namespace MyDiscordBot.Modules
             }
             else
             {
+                if (WordwolfService.Players is null)
+                {
+                    await ReplyAsync("先に遊ぶメンバーを指定してください。");
+                    return;
+                }
                 var triple = await WordwolfService.StartGame(latest: true);
 
                 await Task.WhenAll(WordwolfService.Players.Select(async user =>
