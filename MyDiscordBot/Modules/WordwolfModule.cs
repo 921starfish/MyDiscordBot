@@ -98,5 +98,45 @@ namespace MyDiscordBot.Modules
                 await ReplyAsync("まだゲームが始まっていません。");
             }
         }
+
+        [Command("add")]
+        public async Task Add(string a, string b)
+        {
+            await WordwolfService.Add(a, b);
+            await ReplyAsync("正常に追加されました。");
+        }
+
+        [Command("start_latest")]
+        [Alias("sl")]
+        public async Task StartLatest(params IUser[] users)
+        {
+            var status = await WordwolfService.GetStatus();
+            if (status.IsNowPlaying)
+            {
+                await ReplyAsync("別のゲームが進行中です。");
+            }
+            else
+            {
+                var userList = users.Distinct().ToList();
+                if (userList.Count < 3)
+                {
+                    await ReplyAsync("ワードウルフの最低プレイ人数は3人です！");
+                    return;
+                }
+                var triple = await WordwolfService.StartLatest(userList);
+
+                await Task.WhenAll(userList.Select(async user =>
+                {
+                    if (user.Id == triple.Item1.Id)
+                    {
+                        await user.SendMessageAsync(triple.Item2);
+                    }
+                    else
+                    {
+                        await user.SendMessageAsync(triple.Item3);
+                    }
+                }).ToArray());
+            }
+        }
     }
 }

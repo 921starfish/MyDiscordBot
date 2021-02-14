@@ -40,6 +40,19 @@ namespace MyDiscordBot.Services
             return (status.Wolf, jinroTheme, villagerTheme);
         }
 
+        public async Task<(IUser, string, string)> StartLatest(List<IUser> users)
+        {
+            status.IsNowPlaying = true;
+            status.Voted = new Dictionary<IUser, IUser>();
+
+            var random = new Random();
+            status.Wolf = users[random.Next(users.Count - 1)];
+
+            status.Theme = await DB.WordwolfThemes.LastAsync();
+            var (jinroTheme, villagerTheme) = random.Next(1) == 1 ? (status.Theme.A, status.Theme.B) : (status.Theme.B, status.Theme.A);
+            return (status.Wolf, jinroTheme, villagerTheme);
+        }
+
         public async Task EndGame()
         {
             status.IsNowPlaying = false;
@@ -51,6 +64,13 @@ namespace MyDiscordBot.Services
         public async Task<Status> GetStatus()
         {
             return status;
+        }
+
+        public async Task Add(string a, string b)
+        {
+            var theme = new WordwolfTheme(A: a, B: b);
+            await DB.AddAsync(theme);
+            await DB.SaveChangesAsync();
         }
 
         public class Status
