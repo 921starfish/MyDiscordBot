@@ -23,7 +23,13 @@ namespace MyDiscordBot.Modules
         public async Task SetPlayers(params IUser[] users)
         {
             var userList = users.Distinct().ToList();
-            if (userList.Count < 1)
+            if (userList.Count < 
+                                #if DEBUG 
+                                    1 
+                                #else
+                                    3 
+                                #endif
+            )
             {
                 await ReplyAsync("ワードウルフの最低プレイ人数は3人です！");
                 return;
