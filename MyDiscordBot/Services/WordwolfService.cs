@@ -12,6 +12,7 @@ namespace MyDiscordBot.Services
     public class WordwolfService
     {
         private Status status { get; set; }
+        public List<IUser> Players { get; set; }
         public MyFirstBotDbContext DB { get; set; }
 
         public WordwolfService(MyFirstBotDbContext _db)
@@ -26,13 +27,18 @@ namespace MyDiscordBot.Services
             };
         }
 
-        public async Task<(IUser, string, string)> StartGame(List<IUser> users)
+        public async Task SetPlayers(List<IUser> users)
+        {
+            this.Players = users.Distinct().ToList();
+        }
+
+        public async Task<(IUser, string, string)> StartGame()
         {
             status.IsNowPlaying = true;
             status.Voted = new Dictionary<IUser, IUser>();
 
             var random = new Random();
-            status.Wolf = users[random.Next(users.Count - 1)];
+            status.Wolf = Players[random.Next(Players.Count - 1)];
 
             var allThemes = await DB.WordwolfThemes.ToListAsync();
             status.Theme = allThemes[random.Next(allThemes.Count - 1)];
@@ -40,13 +46,13 @@ namespace MyDiscordBot.Services
             return (status.Wolf, jinroTheme, villagerTheme);
         }
 
-        public async Task<(IUser, string, string)> StartLatest(List<IUser> users)
+        public async Task<(IUser, string, string)> StartLatest()
         {
             status.IsNowPlaying = true;
             status.Voted = new Dictionary<IUser, IUser>();
 
             var random = new Random();
-            status.Wolf = users[random.Next(users.Count - 1)];
+            status.Wolf = Players[random.Next(Players.Count - 1)];
 
             status.Theme = await DB.WordwolfThemes.LastAsync();
             var (jinroTheme, villagerTheme) = random.Next(1) == 1 ? (status.Theme.A, status.Theme.B) : (status.Theme.B, status.Theme.A);

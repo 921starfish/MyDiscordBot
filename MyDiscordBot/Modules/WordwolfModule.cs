@@ -18,9 +18,23 @@ namespace MyDiscordBot.Modules
         public MyFirstBotDbContext DB { get; set; }
         // ↑DI
 
+        [Command("set_players")]
+        [Alias("sp")]
+        public async Task SetPlayers(params IUser[] users)
+        {
+            var userList = users.Distinct().ToList();
+            if (userList.Count < 1)
+            {
+                await ReplyAsync("ワードウルフの最低プレイ人数は3人です！");
+                return;
+            }
+            await WordwolfService.SetPlayers(userList);
+            await ReplyAsync("プレイヤーをセットしました。");
+        }
+
         [Command("wordwolf")]
         [Alias("ww")]
-        public async Task Wordwolf(params IUser[] users)
+        public async Task Wordwolf()
         {
             var status = await WordwolfService.GetStatus();
             if (status.IsNowPlaying)
@@ -50,15 +64,14 @@ namespace MyDiscordBot.Modules
             }
             else
             {
-                var userList = users.Distinct().ToList();
-                if (userList.Count < 3)
+                if(WordwolfService.Players is null)
                 {
-                    await ReplyAsync("ワードウルフの最低プレイ人数は3人です！");
+                    await ReplyAsync("先に遊ぶメンバーを指定してください。");
                     return;
                 }
-                var triple = await WordwolfService.StartGame(userList);
+                var triple = await WordwolfService.StartGame();
 
-                await Task.WhenAll(userList.Select(async user =>
+                await Task.WhenAll(WordwolfService.Players.Select(async user =>
                 {
                     if (user.Id == triple.Item1.Id)
                     {
@@ -108,7 +121,7 @@ namespace MyDiscordBot.Modules
 
         [Command("start_latest")]
         [Alias("sl")]
-        public async Task StartLatest(params IUser[] users)
+        public async Task StartLatest()
         {
             var status = await WordwolfService.GetStatus();
             if (status.IsNowPlaying)
@@ -117,15 +130,9 @@ namespace MyDiscordBot.Modules
             }
             else
             {
-                var userList = users.Distinct().ToList();
-                if (userList.Count < 3)
-                {
-                    await ReplyAsync("ワードウルフの最低プレイ人数は3人です！");
-                    return;
-                }
-                var triple = await WordwolfService.StartLatest(userList);
+                var triple = await WordwolfService.StartLatest();
 
-                await Task.WhenAll(userList.Select(async user =>
+                await Task.WhenAll(WordwolfService.Players.Select(async user =>
                 {
                     if (user.Id == triple.Item1.Id)
                     {
