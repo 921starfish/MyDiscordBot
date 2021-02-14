@@ -21,18 +21,20 @@ namespace MyDiscordBot.Services
             {
                 IsNowPlaying = false,
                 Wolf = null,
-                Theme = null
+                Theme = null,
+                Voted = null
             };
         }
 
         public async Task<(IUser, string, string)> StartGame(List<IUser> users)
         {
             status.IsNowPlaying = true;
+            status.Voted = new Dictionary<IUser, IUser>();
 
             var random = new Random();
             status.Wolf = users[random.Next(users.Count - 1)];
 
-            var allThemes = DB.WordwolfThemes.ToList();
+            var allThemes = await DB.WordwolfThemes.ToListAsync();
             status.Theme = allThemes[random.Next(allThemes.Count - 1)];
             var (jinroTheme, villagerTheme) = random.Next(1) == 1 ? (status.Theme.A, status.Theme.B) : (status.Theme.B, status.Theme.A);
             return (status.Wolf, jinroTheme, villagerTheme);
@@ -43,6 +45,7 @@ namespace MyDiscordBot.Services
             status.IsNowPlaying = false;
             status.Wolf = null;
             status.Theme = null;
+            status.Voted = null;
         }
 
         public async Task<Status> GetStatus()
@@ -55,6 +58,7 @@ namespace MyDiscordBot.Services
             public bool IsNowPlaying { get; set; }
             public IUser Wolf { get; set; }
             public WordwolfTheme Theme { get; set; }
+            public Dictionary<IUser, IUser> Voted { get; set; }
         }
 
     }

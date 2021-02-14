@@ -19,19 +19,39 @@ namespace MyDiscordBot.Modules
         // ↑DI
 
         [Command("wordwolf")]
+        [Alias("ww")]
         public async Task Wordwolf(params IUser[] users)
         {
             var status = await WordwolfService.GetStatus();
             if (status.IsNowPlaying)
             {
                 await ReplyAsync("テーマは「" + status.Theme.A + "」と「" + status.Theme.B + "」でした。");
+                var result = new Dictionary<IUser, int>();
+                foreach (var voted in status.Voted)
+                {
+                    if (result.ContainsKey(voted.Value))
+                    {
+                        result[voted.Value]++;
+                    }
+                    else
+                    {
+                        result.Add(voted.Value, 1);
+                    }
+                }
+                await ReplyAsync("投票結果は以下の通りです。");
+                await Task.WhenAll(result.Select(async res =>
+                {
+                    await ReplyAsync(res.Key.Username + "：" + res.Value + "票");
+                }).ToArray());
+
+
                 await ReplyAsync("人狼は" + status.Wolf.Username + "でした。");
                 await WordwolfService.EndGame();
             }
             else
             {
                 var userList = users.Distinct().ToList();
-                if (userList.Count < 1)// 多分3が適正
+                if (userList.Count < 3)
                 {
                     await ReplyAsync("ワードウルフの最低プレイ人数は3人です！");
                     return;
@@ -48,7 +68,34 @@ namespace MyDiscordBot.Modules
                     {
                         await user.SendMessageAsync(triple.Item3);
                     }
-                }));
+                }).ToArray());
+            }
+        }
+
+        [Command("vote")]
+        public async Task Vote(IUser user = null)
+        {
+            var status = await WordwolfService.GetStatus();
+            if (status.IsNowPlaying)
+            {
+                if (user == null)
+                {
+                    await ReplyAsync("投票する人を指定してください。");
+                    return;
+                }
+
+                try
+                {
+                    status.Voted.Add(Context.User, user);
+                }
+                catch (ArgumentException)
+                {
+                    await ReplyAsync("既にあなたは投票済みです。");
+                }
+            }
+            else
+            {
+                await ReplyAsync("まだゲームが始まっていません。");
             }
         }
     }
