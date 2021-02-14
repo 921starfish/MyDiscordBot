@@ -32,7 +32,7 @@ namespace MyDiscordBot.Services
             this.Players = users.Distinct().ToList();
         }
 
-        public async Task<(IUser, string, string)> StartGame()
+        public async Task<(IUser, string, string)> StartGame(bool latest = false)
         {
             status.IsNowPlaying = true;
             status.Voted = new Dictionary<IUser, IUser>();
@@ -40,21 +40,15 @@ namespace MyDiscordBot.Services
             var random = new Random();
             status.Wolf = Players[random.Next(Players.Count - 1)];
 
-            var allThemes = await DB.WordwolfThemes.ToListAsync();
-            status.Theme = allThemes[random.Next(allThemes.Count - 1)];
-            var (jinroTheme, villagerTheme) = random.Next(1) == 1 ? (status.Theme.A, status.Theme.B) : (status.Theme.B, status.Theme.A);
-            return (status.Wolf, jinroTheme, villagerTheme);
-        }
-
-        public async Task<(IUser, string, string)> StartLatest()
-        {
-            status.IsNowPlaying = true;
-            status.Voted = new Dictionary<IUser, IUser>();
-
-            var random = new Random();
-            status.Wolf = Players[random.Next(Players.Count - 1)];
-
-            status.Theme = await DB.WordwolfThemes.LastAsync();
+            if (latest)
+            {
+                status.Theme = await DB.WordwolfThemes.LastAsync();
+            }
+            else
+            {
+                var allThemes = await DB.WordwolfThemes.ToListAsync();
+                status.Theme = allThemes[random.Next(allThemes.Count - 1)];
+            }
             var (jinroTheme, villagerTheme) = random.Next(1) == 1 ? (status.Theme.A, status.Theme.B) : (status.Theme.B, status.Theme.A);
             return (status.Wolf, jinroTheme, villagerTheme);
         }

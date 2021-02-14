@@ -23,12 +23,12 @@ namespace MyDiscordBot.Modules
         public async Task SetPlayers(params IUser[] users)
         {
             var userList = users.Distinct().ToList();
-            if (userList.Count < 
-                                #if DEBUG 
-                                    1 
-                                #else
+            if (userList.Count <
+#if DEBUG
+                                    1
+#else
                                     3 
-                                #endif
+#endif
             )
             {
                 await ReplyAsync("ワードウルフの最低プレイ人数は3人です！");
@@ -70,7 +70,7 @@ namespace MyDiscordBot.Modules
             }
             else
             {
-                if(WordwolfService.Players is null)
+                if (WordwolfService.Players is null)
                 {
                     await ReplyAsync("先に遊ぶメンバーを指定してください。");
                     return;
@@ -136,7 +136,7 @@ namespace MyDiscordBot.Modules
             }
             else
             {
-                var triple = await WordwolfService.StartLatest();
+                var triple = await WordwolfService.StartGame(latest: true);
 
                 await Task.WhenAll(WordwolfService.Players.Select(async user =>
                 {
