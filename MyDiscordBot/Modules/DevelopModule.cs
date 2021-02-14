@@ -16,6 +16,7 @@ namespace MyDiscordBot.Modules
         public IConfiguration Configuration { get; set; }
         public MyFirstBotDbContext db { get; set; }
 
+#if DEBUG
         [Command("ping")]
         [Alias("pong", "hello")]
         public Task PingAsync()
@@ -65,5 +66,7 @@ namespace MyDiscordBot.Modules
         [RequireContext(ContextType.Guild, ErrorMessage = "Sorry, this command must be ran from within a server, not a DM!")]
         public Task GuildOnlyCommand()
             => ReplyAsync("Nothing to see here!");
+
+#endif
     }
 }
