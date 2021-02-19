@@ -89,6 +89,11 @@ namespace MyDiscordBot.Modules
                         await user.SendMessageAsync(triple.Item3);
                     }
                 }).ToArray());
+
+                Timer timer = new Timer(30000);
+                timer.AutoReset = false;
+                timer.Elapsed += (s, e) => ReplyAsync("3分たちました。議論を終了し投票に移ってください。");
+                timer.Start();
             }
         }
 
