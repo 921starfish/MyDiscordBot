@@ -90,7 +90,7 @@ namespace MyDiscordBot.Modules
                     }
                 }).ToArray());
 
-                Timer timer = new Timer(30000);
+                Timer timer = new Timer(180000);
                 timer.AutoReset = false;
                 timer.Elapsed += (s, e) => ReplyAsync("3分たちました。議論を終了し投票に移ってください。");
                 timer.Start();
@@ -162,7 +162,7 @@ namespace MyDiscordBot.Modules
                 }).ToArray());
             }
 
-            Timer timer = new Timer(30000);
+            Timer timer = new Timer(180000);
             timer.AutoReset = false;
             timer.Elapsed += (s, e) => ReplyAsync("3分たちました。議論を終了し投票に移ってください。");
             timer.Start();
